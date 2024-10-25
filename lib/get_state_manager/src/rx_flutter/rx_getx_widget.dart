@@ -25,6 +25,8 @@ class GetX<T extends DisposableInterface> extends StatefulWidget {
   final void Function(GetX oldWidget, GetXState<T> state)? didUpdateWidget;
   final T? init;
   final String? tag;
+  final bool restorable;
+  final String? restorationId;
 
   const GetX({
     Key? key,
@@ -39,7 +41,9 @@ class GetX<T extends DisposableInterface> extends StatefulWidget {
     this.didChangeDependencies,
     this.didUpdateWidget,
     this.init,
-    // this.streamController
+    // this.streamController,
+    this.restorable = false,
+    this.restorationId,
   }) : super(key: key);
 
   @override
@@ -55,7 +59,8 @@ class GetX<T extends DisposableInterface> extends StatefulWidget {
   }
 
   @override
-  GetXState<T> createState() => GetXState<T>();
+  GetXState<T> createState() =>
+      restorable ? RestorableGetXState<T>() : GetXState<T>();
 }
 
 class GetXState<T extends DisposableInterface> extends State<GetX<T>> {
@@ -131,4 +136,50 @@ class GetXState<T extends DisposableInterface> extends State<GetX<T>> {
         _observer,
         () => widget.builder(controller!),
       );
+}
+
+class RestorableGetXState<T extends DisposableInterface> extends GetXState<T>
+    with RestorationMixin {
+  late RestorableDisposableInterface _restorableController;
+
+  StreamSubscription? _changeSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (controller is DisposableInterfaceRestoration) {
+      _restorableController = RestorableDisposableInterface(
+        (controller as DisposableInterfaceRestoration),
+      );
+
+      _changeSubscription = _observer!.listen((event) {
+        _restorableController.update();
+      });
+    } else {
+      throw """
+      [Get] the improper use of a RestorableGetX has been detected. 
+      You should only use RestorableGetX with a controller which implements the DisposableInterfaceRestoration mixin.
+      """;
+    }
+  }
+
+  @override
+  void dispose() {
+    _changeSubscription?.cancel();
+    _restorableController.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    // Register our property to be saved every time it,
+    // or some reactive value inside it changes,
+    // and to be restored every time our app is killed by the OS!
+    registerForRestoration(_restorableController, 'controller');
+  }
 }

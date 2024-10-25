@@ -62,6 +62,8 @@ class GetCupertinoApp extends StatelessWidget {
   final BackButtonDispatcher? backButtonDispatcher;
   final CupertinoThemeData? theme;
   final bool useInheritedMediaQuery;
+  final String? restorationScopeId;
+
   const GetCupertinoApp({
     Key? key,
     this.theme,
@@ -114,6 +116,7 @@ class GetCupertinoApp extends StatelessWidget {
     this.highContrastTheme,
     this.highContrastDarkTheme,
     this.actions,
+    this.restorationScopeId,
   })  : routeInformationProvider = null,
         routeInformationParser = null,
         routerDelegate = null,
@@ -166,6 +169,7 @@ class GetCupertinoApp extends StatelessWidget {
     this.defaultGlobalState,
     this.getPages,
     this.unknownRoute,
+    this.restorationScopeId,
   })  : routerDelegate = routerDelegate ??= Get.createDelegate(
           notFoundRoute: unknownRoute,
         ),
@@ -249,6 +253,8 @@ class GetCupertinoApp extends StatelessWidget {
                 showSemanticsDebugger: showSemanticsDebugger,
                 debugShowCheckedModeBanner: debugShowCheckedModeBanner,
                 shortcuts: shortcuts,
+                restorationScopeId: restorationScopeId,
+
                 // useInheritedMediaQuery: useInheritedMediaQuery,
               )
             : CupertinoApp(
@@ -289,6 +295,7 @@ class GetCupertinoApp extends StatelessWidget {
                 showSemanticsDebugger: showSemanticsDebugger,
                 debugShowCheckedModeBanner: debugShowCheckedModeBanner,
                 shortcuts: shortcuts,
+                restorationScopeId: restorationScopeId,
                 // useInheritedMediaQuery: useInheritedMediaQuery,
                 //   actions: actions,
               ),
